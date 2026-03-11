@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "qa-technical-assessment",
     "name": "QA Technical Assessment",
-    "description": "API test collection for JSONPlaceholder endpoints as part of the QA Engineer Technical Assessment.",
+    "description": "API test collection for JSONPlaceholder endpoints (https://jsonplaceholder.typicode.com) as part of the QA Engineer Technical Assessment.\n\nThis collection covers 4 API endpoints with positive tests, response validation, and at least 1 negative/edge case per endpoint.\n\nEndpoints tested:\n- GET /users (retrieve all users)\n- GET /users/:id (retrieve specific user)\n- POST /posts (create a new post)\n- PUT /posts/:id (update an existing post)\n- DELETE /posts/:id (delete a post)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -20,9 +20,31 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["users"]
             },
-            "description": "Retrieve all users from the API. Expected: Status 200 with an array of 10 users."
+            "description": "## Request Details\n- **Method:** GET\n- **Endpoint:** /users\n- **Parameters:** None\n- **Authentication:** None required\n\n## Expected Response\n- **Status Code:** 200 OK\n- **Body:** JSON array of 10 user objects\n- **Each user contains:** id, name, username, email, address, phone, website, company\n\n## Analysis\nThis endpoint returns all users from the mock database. JSONPlaceholder always returns exactly 10 users. The response includes nested objects (address with geo coordinates, company with catchPhrase). Response time should be under 2 seconds. No pagination is implemented — the full dataset is returned in a single response."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "200 - All Users Retrieved Successfully",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/users",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["users"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+                { "key": "Cache-Control", "value": "max-age=43200" }
+              ],
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": { \"lat\": \"-37.3159\", \"lng\": \"81.1496\" }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Ervin Howell\",\n    \"username\": \"Antonette\",\n    \"email\": \"Shanna@melissa.tv\"\n  }\n]"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -32,7 +54,15 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "pm.test('Response is an array of users', function () {",
+                  "pm.test('Response time is under 2 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is application/json', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "",
+                  "pm.test('Response is an array of 10 users', function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData).to.be.an('array');",
                   "    pm.expect(jsonData.length).to.eql(10);",
@@ -45,6 +75,17 @@
                   "        pm.expect(user).to.have.property('name');",
                   "        pm.expect(user).to.have.property('email');",
                   "        pm.expect(user).to.have.property('username');",
+                  "        pm.expect(user).to.have.property('address');",
+                  "        pm.expect(user).to.have.property('phone');",
+                  "        pm.expect(user).to.have.property('website');",
+                  "        pm.expect(user).to.have.property('company');",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test('User IDs are sequential from 1 to 10', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    jsonData.forEach(function(user, index) {",
+                  "        pm.expect(user.id).to.eql(index + 1);",
                   "    });",
                   "});"
                 ],
@@ -70,15 +111,37 @@
                 }
               ]
             },
-            "description": "Edge Case: Send an invalid query parameter. Expected: Status 200 with an empty array."
+            "description": "## Request Details\n- **Method:** GET\n- **Endpoint:** /users?id=invalid\n- **Parameters:** id=invalid (non-numeric value)\n\n## Expected Response\n- **Status Code:** 200 OK\n- **Body:** Empty JSON array []\n\n## Analysis\nNegative test: passing a non-numeric string as the id filter parameter. JSONPlaceholder does not return a 400 Bad Request for invalid query params — instead it returns 200 with an empty array. This is a design observation: the API silently filters with no matches rather than rejecting invalid input. A production API should ideally return 400 for malformed parameters."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "200 - Empty Array for Invalid Filter",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/users?id=invalid",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["users"],
+                  "query": [{ "key": "id", "value": "invalid" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "[]"
+            }
+          ],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status code is 200', function () {",
+                  "pm.test('Status code is 200 (API does not reject invalid params)', function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
@@ -109,9 +172,31 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["users", "1"]
             },
-            "description": "Retrieve a specific user by ID. Expected: Status 200 with user data for Leanne Graham."
+            "description": "## Request Details\n- **Method:** GET\n- **Endpoint:** /users/1\n- **Path Parameter:** id = 1\n- **Authentication:** None required\n\n## Expected Response\n- **Status Code:** 200 OK\n- **Body:** Single user object for Leanne Graham\n- **Fields:** id (1), name, username (Bret), email (Sincere@april.biz), address, phone, website, company\n\n## Analysis\nThis endpoint returns a single user object (not wrapped in an array). The response structure is the same as individual items in GET /users. User ID 1 consistently returns 'Leanne Graham' with username 'Bret'. The response includes nested objects for address (with geo coordinates) and company details. Valid IDs range from 1-10."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "200 - User 1 Retrieved Successfully",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/users/1",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["users", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+                { "key": "Cache-Control", "value": "max-age=43200" }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Leanne Graham\",\n  \"username\": \"Bret\",\n  \"email\": \"Sincere@april.biz\",\n  \"address\": {\n    \"street\": \"Kulas Light\",\n    \"suite\": \"Apt. 556\",\n    \"city\": \"Gwenborough\",\n    \"zipcode\": \"92998-3874\",\n    \"geo\": {\n      \"lat\": \"-37.3159\",\n      \"lng\": \"81.1496\"\n    }\n  },\n  \"phone\": \"1-770-736-8031 x56442\",\n  \"website\": \"hildegard.org\",\n  \"company\": {\n    \"name\": \"Romaguera-Crona\",\n    \"catchPhrase\": \"Multi-layered client-server neural-net\",\n    \"bs\": \"harness real-time e-markets\"\n  }\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -119,6 +204,14 @@
                 "exec": [
                   "pm.test('Status code is 200', function () {",
                   "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is under 2 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is application/json', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
                   "});",
                   "",
                   "pm.test('User data is correct', function () {",
@@ -129,10 +222,20 @@
                   "    pm.expect(jsonData.email).to.eql('Sincere@april.biz');",
                   "});",
                   "",
-                  "pm.test('User has address and company', function () {",
+                  "pm.test('Response is a single object (not an array)', function () {",
                   "    const jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('address');",
-                  "    pm.expect(jsonData).to.have.property('company');",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData).to.not.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('User has nested address and company objects', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.address).to.be.an('object');",
+                  "    pm.expect(jsonData.address).to.have.property('street');",
+                  "    pm.expect(jsonData.address).to.have.property('city');",
+                  "    pm.expect(jsonData.address.geo).to.have.property('lat');",
+                  "    pm.expect(jsonData.company).to.be.an('object');",
+                  "    pm.expect(jsonData.company).to.have.property('name');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -151,9 +254,30 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["users", "999"]
             },
-            "description": "Edge Case: Request a user that does not exist. Expected: Status 404 with empty object."
+            "description": "## Request Details\n- **Method:** GET\n- **Endpoint:** /users/999\n- **Path Parameter:** id = 999 (does not exist)\n\n## Expected Response\n- **Status Code:** 404 Not Found\n- **Body:** Empty JSON object {}\n\n## Analysis\nNegative test: requesting a user ID that is outside the valid range (1-10). The API correctly returns 404 with an empty object body {}. This confirms the API distinguishes between valid and invalid resource IDs. Note: the response body is an empty object, not null or an error message — a design choice by JSONPlaceholder."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "404 - User Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/users/999",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["users", "999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "{}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -198,16 +322,52 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["posts"]
             },
-            "description": "Create a new post. Expected: Status 201 with the created post data including an id."
+            "description": "## Request Details\n- **Method:** POST\n- **Endpoint:** /posts\n- **Headers:** Content-Type: application/json\n- **Body:** { title, body, userId }\n\n## Expected Response\n- **Status Code:** 201 Created\n- **Body:** Created post object with server-assigned id (101)\n- **Fields returned:** id, title, body, userId\n\n## Analysis\nThis endpoint simulates creating a new resource. JSONPlaceholder always assigns id: 101 to new posts (since 100 posts exist in the mock database). The server echoes back the submitted data plus the generated id. Important: this is a mock API — the post is not actually persisted. Subsequent GET requests will not return this post. The Content-Type header must be set to application/json for the server to parse the body correctly."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "201 - Post Created Successfully",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"QA Test Post\",\n  \"body\": \"Testing API endpoint\",\n  \"userId\": 1\n}"
+                },
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/posts",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["posts"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+                { "key": "Location", "value": "https://jsonplaceholder.typicode.com/posts/101" }
+              ],
+              "body": "{\n  \"title\": \"QA Test Post\",\n  \"body\": \"Testing API endpoint\",\n  \"userId\": 1,\n  \"id\": 101\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status code is 201', function () {",
+                  "pm.test('Status code is 201 Created', function () {",
                   "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response time is under 2 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is application/json', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
                   "});",
                   "",
                   "pm.test('Post created with correct data', function () {",
@@ -217,10 +377,11 @@
                   "    pm.expect(jsonData.userId).to.eql(1);",
                   "});",
                   "",
-                  "pm.test('Post has an ID assigned', function () {",
+                  "pm.test('Post has a server-assigned numeric ID', function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData).to.have.property('id');",
                   "    pm.expect(jsonData.id).to.be.a('number');",
+                  "    pm.expect(jsonData.id).to.eql(101);",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -248,9 +409,36 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["posts"]
             },
-            "description": "Edge Case: Create a post with an empty body. Expected: Status 201 (mock API accepts it) but no title/body fields."
+            "description": "## Request Details\n- **Method:** POST\n- **Endpoint:** /posts\n- **Headers:** Content-Type: application/json\n- **Body:** {} (empty object — no title, body, or userId)\n\n## Expected Response\n- **Status Code:** 201 Created\n- **Body:** { id: 101 }\n\n## Analysis\nNegative test: submitting a POST with an empty JSON body. A production API should return 400 Bad Request with validation errors for missing required fields (title, body, userId). However, JSONPlaceholder is a mock API with no server-side validation — it accepts the empty body and returns 201 with only an auto-generated id. This highlights a key difference between mock and production APIs: mock APIs often lack input validation."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "201 - Empty Body Accepted (Mock API Behavior)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/posts",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["posts"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "{\n  \"id\": 101\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -260,9 +448,11 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "pm.test('Post is created with an ID but no content', function () {",
+                  "pm.test('Post is created with an ID but no content fields', function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.not.have.property('title');",
+                  "    pm.expect(jsonData).to.not.have.property('body');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -295,9 +485,36 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["posts", "1"]
             },
-            "description": "Update an existing post. Expected: Status 200 with updated post data."
+            "description": "## Request Details\n- **Method:** PUT\n- **Endpoint:** /posts/1\n- **Path Parameter:** id = 1\n- **Headers:** Content-Type: application/json\n- **Body:** { title: 'Updated Post', body: 'Updated content', userId: 1 }\n\n## Expected Response\n- **Status Code:** 200 OK\n- **Body:** Updated post object with id: 1 and the new field values\n\n## Analysis\nPUT performs a full resource replacement. The server returns the updated object with id preserved. JSONPlaceholder simulates the update — calling GET /posts/1 afterward will still return the original data since this is a mock API. In a production environment, PUT should replace all fields; omitted fields would be removed (unlike PATCH which is partial). The response confirms the update was accepted by echoing back the submitted data."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "200 - Post Updated Successfully",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Post\",\n  \"body\": \"Updated content\",\n  \"userId\": 1\n}"
+                },
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/posts/1",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["posts", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "{\n  \"title\": \"Updated Post\",\n  \"body\": \"Updated content\",\n  \"userId\": 1,\n  \"id\": 1\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -307,11 +524,23 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
+                  "pm.test('Response time is under 2 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test('Content-Type is application/json', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "",
                   "pm.test('Post updated with correct data', function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.title).to.eql('Updated Post');",
                   "    pm.expect(jsonData.body).to.eql('Updated content');",
                   "    pm.expect(jsonData.userId).to.eql(1);",
+                  "});",
+                  "",
+                  "pm.test('Post ID is preserved after update', function () {",
+                  "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.id).to.eql(1);",
                   "});"
                 ],
@@ -340,9 +569,36 @@
               "host": ["jsonplaceholder", "typicode", "com"],
               "path": ["posts", "999"]
             },
-            "description": "Edge Case: Attempt to update a post that does not exist. Expected: Error response (500)."
+            "description": "## Request Details\n- **Method:** PUT\n- **Endpoint:** /posts/999\n- **Path Parameter:** id = 999 (does not exist)\n- **Headers:** Content-Type: application/json\n- **Body:** { title, body, userId }\n\n## Expected Response\n- **Status Code:** 500 Internal Server Error\n- **Body:** Error response\n\n## Analysis\nNegative test: attempting to update a resource that does not exist. JSONPlaceholder returns 500 Internal Server Error for PUT on non-existent IDs beyond its dataset. A well-designed production API should return 404 Not Found instead. The 500 response indicates the mock server does not gracefully handle this edge case — it throws an unhandled error rather than returning a proper 404. This is a notable behavioral difference from REST best practices."
           },
-          "response": [],
+          "response": [
+            {
+              "name": "500 - Internal Server Error for Non-existent Resource",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Ghost Post\",\n  \"body\": \"This post does not exist\",\n  \"userId\": 1\n}"
+                },
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/posts/999",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["posts", "999"]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "{}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -350,6 +606,128 @@
                 "exec": [
                   "pm.test('Returns error for non-existent post', function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+                  "});",
+                  "",
+                  "pm.test('Response does not contain the submitted data', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.not.have.property('title');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DELETE Post",
+      "item": [
+        {
+          "name": "Delete Post 1",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://jsonplaceholder.typicode.com/posts/1",
+              "protocol": "https",
+              "host": ["jsonplaceholder", "typicode", "com"],
+              "path": ["posts", "1"]
+            },
+            "description": "## Request Details\n- **Method:** DELETE\n- **Endpoint:** /posts/1\n- **Path Parameter:** id = 1\n- **Body:** None\n\n## Expected Response\n- **Status Code:** 200 OK\n- **Body:** Empty object {}\n\n## Analysis\nAdditional test beyond requirements. DELETE removes a resource by ID. JSONPlaceholder returns 200 with an empty object to simulate successful deletion. No Content-Type header is strictly needed for DELETE requests since there is no request body. In a production API, 204 No Content would be more appropriate than 200 for a successful deletion. Since this is a mock API, the resource is not actually deleted — subsequent GET /posts/1 will still return data."
+          },
+          "response": [
+            {
+              "name": "200 - Post Deleted Successfully",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/posts/1",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["posts", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "{}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response time is under 2 seconds', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty object', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(Object.keys(jsonData).length).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Edge Case - Delete Non-existent Post 999",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://jsonplaceholder.typicode.com/posts/999",
+              "protocol": "https",
+              "host": ["jsonplaceholder", "typicode", "com"],
+              "path": ["posts", "999"]
+            },
+            "description": "## Request Details\n- **Method:** DELETE\n- **Endpoint:** /posts/999\n- **Path Parameter:** id = 999 (does not exist)\n\n## Expected Response\n- **Status Code:** 200 OK\n- **Body:** Empty object {}\n\n## Analysis\nNegative test: attempting to delete a resource that does not exist. JSONPlaceholder returns 200 even for non-existent resources — it does not validate whether the resource exists before responding. A production API should return 404 Not Found to indicate the resource was not found. This is an idempotency observation: the mock API treats all DELETE requests the same regardless of whether the resource exists."
+          },
+          "response": [
+            {
+              "name": "200 - Mock API Accepts Delete of Non-existent Resource",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "https://jsonplaceholder.typicode.com/posts/999",
+                  "protocol": "https",
+                  "host": ["jsonplaceholder", "typicode", "com"],
+                  "path": ["posts", "999"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+              ],
+              "body": "{}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 (mock API does not validate existence)', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty object', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(Object.keys(jsonData).length).to.eql(0);",
                   "});"
                 ],
                 "type": "text/javascript"

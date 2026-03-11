@@ -6,3 +6,9 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Postman desktop app auto-generated files
+.postman/
+Postman/collections/
+Postman/environments/
+Postman/globals/

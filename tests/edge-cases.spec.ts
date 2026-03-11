@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './base.fixture';
 
 test.describe('SauceDemo Edge Cases', () => {
 
-  test('Invalid Login - wrong password', async ({ page }) => {
+  test('Invalid Login - wrong password', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     await page.fill('#user-name', 'standard_user');
@@ -13,9 +13,10 @@ test.describe('SauceDemo Edge Cases', () => {
     const errorMessage = page.locator('[data-test="error"]');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toContainText('Username and password do not match any user in this service');
+    await takeScreenshot('edge-invalid-login-wrong-password');
   });
 
-  test('Invalid Login - empty credentials', async ({ page }) => {
+  test('Invalid Login - empty credentials', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     await page.click('#login-button');
@@ -24,9 +25,10 @@ test.describe('SauceDemo Edge Cases', () => {
     const errorMessage = page.locator('[data-test="error"]');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toContainText('Username is required');
+    await takeScreenshot('edge-invalid-login-empty-credentials');
   });
 
-  test('Invalid Login - locked out user', async ({ page }) => {
+  test('Invalid Login - locked out user', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     await page.fill('#user-name', 'locked_out_user');
@@ -37,9 +39,10 @@ test.describe('SauceDemo Edge Cases', () => {
     const errorMessage = page.locator('[data-test="error"]');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toContainText('Sorry, this user has been locked out');
+    await takeScreenshot('edge-invalid-login-locked-out-user');
   });
 
-  test('Checkout Without Items - cart is empty', async ({ page }) => {
+  test('Checkout Without Items - cart is empty', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     // Login
@@ -54,6 +57,7 @@ test.describe('SauceDemo Edge Cases', () => {
 
     // Verify cart is empty - no items present
     await expect(page.locator('.cart_item')).toHaveCount(0);
+    await takeScreenshot('edge-empty-cart');
 
     // Click checkout with empty cart
     await page.click('#checkout');
@@ -66,9 +70,10 @@ test.describe('SauceDemo Edge Cases', () => {
 
     // Verify no items in checkout overview
     await expect(page.locator('.cart_item')).toHaveCount(0);
+    await takeScreenshot('edge-empty-cart-checkout-overview');
   });
 
-  test('Missing Checkout Fields - empty postal code', async ({ page }) => {
+  test('Missing Checkout Fields - empty postal code', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     // Login
@@ -93,9 +98,10 @@ test.describe('SauceDemo Edge Cases', () => {
     const errorMessage = page.locator('[data-test="error"]');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toContainText('Postal Code is required');
+    await takeScreenshot('edge-missing-postal-code');
   });
 
-  test('Missing Checkout Fields - empty first name', async ({ page }) => {
+  test('Missing Checkout Fields - empty first name', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     // Login
@@ -117,9 +123,10 @@ test.describe('SauceDemo Edge Cases', () => {
     const errorMessage = page.locator('[data-test="error"]');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toContainText('First Name is required');
+    await takeScreenshot('edge-missing-first-name');
   });
 
-  test('Missing Checkout Fields - all fields empty', async ({ page }) => {
+  test('Missing Checkout Fields - all fields empty', async ({ page, takeScreenshot }) => {
     await page.goto('https://www.saucedemo.com');
 
     // Login
@@ -139,6 +146,7 @@ test.describe('SauceDemo Edge Cases', () => {
     const errorMessage = page.locator('[data-test="error"]');
     await expect(errorMessage).toBeVisible();
     await expect(errorMessage).toContainText('First Name is required');
+    await takeScreenshot('edge-missing-all-fields');
   });
 
 });

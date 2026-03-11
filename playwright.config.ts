@@ -8,10 +8,11 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 3,
   timeout: 60000,
   reporter: 'html',
+  globalSetup: './global-setup.ts',
   use: {
     baseURL: 'https://www.saucedemo.com',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
   },
 
   projects: [
