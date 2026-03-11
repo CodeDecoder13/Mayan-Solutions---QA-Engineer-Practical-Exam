@@ -1,0 +1,22 @@
+{
+  "name": "mayan-solutions---qa-engineer-practical-exam",
+  "version": "1.0.0",
+  "description": "Demonstrate your ability to perform manual testing, automation, and API testing on sample applications to verify that core features work as expected.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CodeDecoder13/Mayan-Solutions---QA-Engineer-Practical-Exam.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CodeDecoder13/Mayan-Solutions---QA-Engineer-Practical-Exam/issues"
+  },
+  "homepage": "https://github.com/CodeDecoder13/Mayan-Solutions---QA-Engineer-Practical-Exam#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.4.0"
+  }
+}
